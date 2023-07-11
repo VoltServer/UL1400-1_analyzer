@@ -1,0 +1,31 @@
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[.editorconfig]
+indent_size = 4
+
+[.gitattributes]
+indent_size = 4
+
+[.gitignore]
+indent_size = 4
+
+[.pylintrc]
+indent_size = 8
+
+[*.md]
+indent_size = 2
+
+[*.py]
+indent_size = 4
+
+[*.txt]
+indent_size = 4
+
+[*.{yaml,yml}]
+indent_size = 2
