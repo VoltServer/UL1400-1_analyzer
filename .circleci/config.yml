@@ -17,9 +17,6 @@ workflows:
       - pylint-ci_support:
           context:
             - docker-hub-creds
-      - pylint-conftest:
-          context:
-            - docker-hub-creds
       - init-py-checker:
           context:
             - docker-hub-creds
