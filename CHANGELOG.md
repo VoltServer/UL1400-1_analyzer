@@ -113,6 +113,6 @@ Compare to [stable](https://github.com/VoltServer/UL1400-1_analyzer/compare/stab
 
 Reference-style links here (see below, only in source) in develop-merge order.
 
-[#1]: https://github.com/VoltServer/ul1400_1_analyzer/issues/1 'Issue #1'
+[#1]: https://github.com/VoltServer/UL1400-1_analyzer/issues/1 'Issue #1'
 
-[#2]: https://github.com/VoltServer/ul1400_1_analyzer/pull/2 'PR #2'
+[#2]: https://github.com/VoltServer/UL1400-1_analyzer/pull/2 'PR #2'
