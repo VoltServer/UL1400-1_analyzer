@@ -109,11 +109,11 @@ def import_from_csv(filepath:str|os.PathLike, by_labels:list[str]|None=None,
             if data_row_parse_ready:
                 _parse_csv_row_data(row, cols_by_label, cols_by_id, waveforms)
 
-            elif row[0] == 'Labels':
+            elif _is_csv_label_axis_start(row[0], None):
                 _parse_csv_row_labels(row, axis_start_cols, by_labels,
                         cols_by_label, case_sensitive)
 
-            elif row[0] == 'TIME':
+            elif is_csv_id_axis_start(row[0], None):
                 _parse_csv_row_ids(row, axis_start_cols, by_ids, cols_by_id,
                         case_sensitive)
 
@@ -127,12 +127,65 @@ def import_from_csv(filepath:str|os.PathLike, by_labels:list[str]|None=None,
 
 
 
+def _is_csv_label_axis_start(cell:str, previous_cell:str|None) -> bool:
+    """
+    Checks if the provided cell is the start of an axis/data-group for the label
+    header row.  It is the caller's responsibility to provide cell data from the
+    label header row.
+
+    NOTE: There is a corner case where someone named a channel "Labels" and did
+    not label the channel immediately previous to it in this group, but this is
+    expected to be rare and will result in an exception when validating headers.
+    When using case insensitivity, this becomes impossible.
+
+    Args:
+      cell: The contents of the present cell being analyzed.
+      previous_cell: The previous cell in the row from the immediately preceding
+        column to the left.  Can be None if `cell` is the first column.
+
+    Returns:
+      _: True if this indicates the start of a new axis/data-group according to
+        the label row (with the exception of the corner case noted above in this
+        docstring); False otherwise.
+    """
+    return cell == 'Labels' and (previous_cell is None or previous_cell == '')
+
+
+
+def is_csv_id_axis_start(cell:str, previous_cell:str|None) -> bool:
+    """
+    Checks if the provided cell is the start of an axis/data-group for the ID
+    header row.  It is the caller's responsibility to provide cell data from the
+    ID header row.
+
+    Args:
+      cell: The contents of the present cell being analyzed.
+      previous_cell: The previous cell in the row from the immediately preceding
+        column to the left.  Can be None if `cell` is the first column.
+
+    Returns:
+      _: True if this indicates the start of a new axis/data-group according to
+        the ID row; False otherwise.
+    """
+    return cell in ['TIME', 'FREQUENCY'] \
+            and (previous_cell is None or previous_cell == '')
+
+
+
 def _parse_csv_row_data(row:list[str], cols_by_label:dict[str, dict[str, int]],
         cols_by_id:dict[str, dict[str, int]],
         waveforms:dict[str, dict[str, dict[float, float]]]) -> None:
     """
     For the CSV format, parses a single data row.  It is the caller's
     responsibility to ensure the header rows have already been parsed.
+
+    This handles clipping data (appears in CSV as "inf"/"-inf"), invalid data
+    (appears in CSV as "nan"), and waveforms of differing lengths (appears in
+    CSV as an empty cell for the y-data).
+
+    There is no distinction whether the data is time-domain or frequency-domain
+    data -- it is the caller's responsibility to interpret the x-data of the
+    waveform as time-domain or frequency-domain as appropriate.
 
     Args:
       row: The row of the CSV to parse.
@@ -151,13 +204,17 @@ def _parse_csv_row_data(row:list[str], cols_by_label:dict[str, dict[str, int]],
         insensitive, label and id names will be lowercase.
     """
     for label, data in waveforms['by_label'].items():
-        x = float(row[cols_by_label[label]['x']])
-        y = float(row[cols_by_label[label]['y']])
-        data[x] = y
+        if row[cols_by_label[label]['y']] != '':
+            x = float(row[cols_by_label[label]['x']])
+            y = float(row[cols_by_label[label]['y']])
+            data[x] = y
+        # Else, this dataset likely has less data than at least 1 other
     for id_, data in waveforms['by_id'].items():
-        x = float(row[cols_by_id[id_]['x']])
-        y = float(row[cols_by_id[id_]['y']])
-        data[x] = y
+        if row[cols_by_id[id_]['y']] != '':
+            x = float(row[cols_by_id[id_]['x']])
+            y = float(row[cols_by_id[id_]['y']])
+            data[x] = y
+        # Else, this dataset likely has less data than at least 1 other
 
 
 
@@ -200,12 +257,7 @@ def _parse_csv_row_labels(row:list[str], axis_start_cols:dict[str, list[int]],
             previous_cell = ''
             continue
 
-        if cell == 'Labels' and previous_cell == '':
-            # There is a corner case where someone named a channel "Labels" and
-            #   did not label the channel immediately previous to it in this
-            #   group, but this is expected to be rare and will result in an
-            #   exception when validating headers.  When using case
-            #   insensitivity, this becomes impossible.
+        if _is_csv_label_axis_start(cell, previous_cell):
             axis_start_cols['label_row'].append(col_index)
             continue
 
@@ -262,7 +314,7 @@ def _parse_csv_row_ids(row:list[str], axis_start_cols:dict[str, list[int]],
             previous_cell = ''
             continue
 
-        if cell == 'TIME' and previous_cell == '':
+        if is_csv_id_axis_start(cell, previous_cell):
             axis_start_cols['id_row'].append(col_index)
             continue
 
