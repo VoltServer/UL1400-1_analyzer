@@ -5,3 +5,38 @@ format.
 Module Attributes:
   N/A
 """
+from typing import Any
+
+from ul1400_1_analyzer.data_import import tek_mso4
+
+
+
+def import_data(source_type:str, format_type:str, *args:Any, **kwargs:Any) \
+    -> Any:
+    """
+    Imports data from the specified source and format using the configuration
+    arguments provided.
+
+    Args:
+      source_type: The importer source type (e.g. 'tek_mso4').  See the source
+        type names defined at the top of each data importer for a complete list
+        of options.
+      format_type: The format type of the data being imported (e.g. 'csv').  See
+        the relevant list of names defined at the top of the targeted source for
+        the intended format for a complete list of options.
+      *args, **kwargs: The arguments to be passed along to the importer
+        specified by the source and format types.  Will vary depending on the
+        importer selected -- see the docstring for the targeted importer for
+        full details.
+
+    Returns:
+      _: The data loaded by the importer.  Structure will depend upon the source
+        and format types selected -- see the docstring for the targeted importer
+        for full details.
+
+    Raises:
+      ValueError: Raised if an invalid source type is provided.
+    """
+    if source_type.lower() in tek_mso4.SOURCE_TYPE_NAMES:
+        return tek_mso4.import_data(format_type, *args, **kwargs)
+    raise ValueError(f'Unsupported data importer source type: {source_type}')
