@@ -34,6 +34,7 @@ Compare to [stable](https://github.com/VoltServer/UL1400-1_analyzer/compare/stab
 ### Project & Toolchain: `.git*`, `.editorconfig`
 - [Added] `.editorconfig` and `.gitattributes` added ([#1][]).
 - [Added] VS Code related items added to `.gitignore` ([#1][]).
+- [Added] `*.csv` added to `.gitignore` [#7][].
 
 
 ### Project & Toolchain: CircleCI
@@ -67,6 +68,16 @@ Compare to [stable](https://github.com/VoltServer/UL1400-1_analyzer/compare/stab
       ([#1][]).
 - [Added] `.mypy.ini` added to configure `mypy` execution for app code and test
       code ([#1][]).
+
+
+### Data Import: Data Importer
+- [Added] `data_importer.py` added with generic function call for
+      `import_data()` meant to be central point for all imports ([#7][]).
+
+
+### Data Import: Tek MSO4
+- [Added] `tek_mso4.py` added with support for CSV parsing for Tektronix MSO
+      4-series scopes ([#7][]).
 
 
 ### Version
@@ -104,9 +115,11 @@ Compare to [stable](https://github.com/VoltServer/UL1400-1_analyzer/compare/stab
 
 #### Issues
 - [#1][]
+- [#7][]
 
 #### PRs
 - [#2][] for [#1][]
+- [#8][] for [#7][]
 
 ---
 
@@ -114,5 +127,7 @@ Compare to [stable](https://github.com/VoltServer/UL1400-1_analyzer/compare/stab
 Reference-style links here (see below, only in source) in develop-merge order.
 
 [#1]: https://github.com/VoltServer/UL1400-1_analyzer/issues/1 'Issue #1'
+[#7]: https://github.com/VoltServer/UL1400-1_analyzer/issues/7 'Issue #7'
 
 [#2]: https://github.com/VoltServer/UL1400-1_analyzer/pull/2 'PR #2'
+[#8]: https://github.com/VoltServer/UL1400-1_analyzer/pull/8 'PR #8'
