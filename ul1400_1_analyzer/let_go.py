@@ -7,6 +7,8 @@ Module Attributes:
 """
 import math
 
+from alive_progress import alive_bar                      # type: ignore[import]
+
 from ul1400_1_analyzer.utils import waveform as waveform_utils
 
 
@@ -75,28 +77,35 @@ def find_time_regions_below_letgo(current_waveform:dict[float, float]|None=None,
         target_end_time = max(waveform.keys())
         target_start_time:float|None = target_end_time - min_window_duration
 
-        while target_start_time is not None \
-                and target_start_time >= min_start_time:
-            segment = waveform_utils.get_segment_from_waveform(waveform,
-                    target_start_time, target_end_time, min_window_duration,
-                    'start')
+        approx_len = len([t for t in waveform.keys()
+                if t >= min_start_time + min_window_duration])
 
-            if is_below_letgo(measurement_type, segment.values(),
-                    env_conditions):
-                new_region = (min(segment.keys()), max(segment.keys()))
-                working_region = waveform_utils.expand_region(working_region,
-                        new_region)
-            elif working_region is not None:
-                time_regions_below_letgo.append(working_region)
-                working_region = None
+        with alive_bar(approx_len,
+                title=f'Analyzing {measurement_type} waveform') as progress_bar:
+            while target_start_time is not None \
+                    and target_start_time >= min_start_time:
+                segment = waveform_utils.get_segment_from_waveform(waveform,
+                        target_start_time, target_end_time, min_window_duration,
+                        'start')
 
-            remaining_end_times = [t for t in waveform.keys()
-                    if t < target_end_time]
-            if remaining_end_times:
-                target_end_time = max(remaining_end_times)
-                target_start_time = target_end_time - min_window_duration
-            else:
-                target_start_time = None
+                if is_below_letgo(measurement_type, segment.values(),
+                        env_conditions):
+                    new_region = (min(segment.keys()), max(segment.keys()))
+                    working_region = waveform_utils.expand_region(
+                            working_region, new_region)
+                elif working_region is not None:
+                    time_regions_below_letgo.append(working_region)
+                    working_region = None
+
+                remaining_end_times = [t for t in waveform.keys()
+                        if t < target_end_time]
+                if remaining_end_times:
+                    target_end_time = max(remaining_end_times)
+                    target_start_time = target_end_time - min_window_duration
+                else:
+                    target_start_time = None
+
+                progress_bar()                    # pylint: disable=not-callable
 
         if working_region is not None:
             time_regions_below_letgo.append(working_region)
