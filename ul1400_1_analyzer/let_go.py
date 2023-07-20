@@ -83,7 +83,7 @@ def find_time_regions_below_letgo(current_waveform:dict[float, float]|None=None,
 
             if is_below_letgo(measurement_type, segment.values(),
                     env_conditions):
-                new_region = (min(segment.keys(), max(segment.keys())))
+                new_region = (min(segment.keys()), max(segment.keys()))
                 working_region = waveform_utils.expand_region(working_region,
                         new_region)
             elif working_region is not None:
