@@ -152,13 +152,13 @@ def get_segment_from_waveform(waveform:dict[float, float]|None,
         while max(segment.keys()) - min(segment.keys()) < min_duration:
             if direction_to_extend_beyond == 'start':
                 min_segment_time = min(segment.keys())
-                next_earlier_time = max([t for t in waveform.keys()
-                        if t < min_segment_time])
+                next_earlier_time = max(t for t in waveform.keys()
+                        if t < min_segment_time)
                 segment[next_earlier_time] = waveform[next_earlier_time]
             elif direction_to_extend_beyond == 'end':
                 max_segment_time = max(segment.keys())
-                next_later_time = min([t for t in waveform.keys()
-                        if t > max_segment_time])
+                next_later_time = min(t for t in waveform.keys()
+                        if t > max_segment_time)
                 segment[next_later_time] = waveform[next_later_time]
     except ValueError:
         return None

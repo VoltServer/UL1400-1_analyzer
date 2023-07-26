@@ -61,6 +61,7 @@ Compare to [stable](https://github.com/VoltServer/UL1400-1_analyzer/compare/stab
 ### Project & Toolchain: Package, Requirements
 - [Added] `requirements.txt` added, with `pylint` and `mypy` as only entries
       ([#1][]).
+- [Added] `alive-progress` added to `requirements.txt` ([#4][]).
 
 
 ### Project & Toolchain: Pylint, Mypy
@@ -68,16 +69,36 @@ Compare to [stable](https://github.com/VoltServer/UL1400-1_analyzer/compare/stab
       ([#1][]).
 - [Added] `.mypy.ini` added to configure `mypy` execution for app code and test
       code ([#1][]).
+- [Added] `max-locals` set to `20` ([#4][]).
+
+
+### Analysis: Letgo Analyzer
+- [Added] `letgo_analyzer.py` added with ability to analyze waveforms strictly
+      to UL1400-1 with parallel CPU core processing support ([#4][]).
 
 
 ### Data Import: Data Importer
 - [Added] `data_importer.py` added with generic function call for
       `import_data()` meant to be central point for all imports ([#7][]).
+- [Added] Module attributes added to list all supported source types and format
+      types for usage in CLI help messages ([#4][]).
 
 
 ### Data Import: Tek MSO4
 - [Added] `tek_mso4.py` added with support for CSV parsing for Tektronix MSO
       4-series scopes ([#7][]).
+- [Added] Module attributes added to list all supported format types for usage
+      in CLI help messages ([#4][]).
+
+
+## Utils: Waveform
+- [Added] `waveform.py` added to encapsulate generic waveform manipulations,
+      such as extracting segments and merging regions ([#4][]).
+
+
+### Main
+- [Added] `main.py` added with CLI sub-parser for letgo and help function to
+      route CLI args to letgo analyzer as well as display results ([#4][]).
 
 
 ### Version
@@ -107,6 +128,7 @@ Compare to [stable](https://github.com/VoltServer/UL1400-1_analyzer/compare/stab
 
 ### Docs: Usage
 - [Added] `usage.md` added with bare minimum on how to run ([#1][]).
+- [Added] Example of executing let-go evaluation added ([#4][]).
 
 
 ### Ref Links
