@@ -3,7 +3,9 @@ This performs the evaluation of the let-go limit and the Fault Recovery Period
 per UL1400-1.
 
 Module Attributes:
-  N/A
+  _PROGRESS_COUNTER: A shared multiprocessing value that tracks the progress of
+    how many iterations have been completed across all processes.  Will be None
+    when not in use.
 """
 import math
 import multiprocessing as mp

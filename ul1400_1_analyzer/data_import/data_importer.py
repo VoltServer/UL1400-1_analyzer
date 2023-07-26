@@ -3,11 +3,28 @@ Central entry point to import data from any supported source in any supported
 format.
 
 Module Attributes:
-  N/A
+  SUPPORTED_FORMAT_TYPES: All possible format type names supported.  Not all
+    format type are supported by all source types, but each format type will be
+    supported by at least one.
+  SUPPORTED_SOURCE_TYPES: All supported source type names.
+  _SUPPORTED_IMPORTERS: All data import modules that are supported by this
+    generic interface.
 """
 from typing import Any
 
 from ul1400_1_analyzer.data_import import tek_mso4
+
+
+
+_SUPPORTED_IMPORTERS = [
+    tek_mso4,
+]
+
+SUPPORTED_SOURCE_TYPES = {s for m in _SUPPORTED_IMPORTERS
+        for s in m.SOURCE_TYPE_NAMES}
+
+SUPPORTED_FORMAT_TYPES = {f for m in _SUPPORTED_IMPORTERS
+        for f in m.FORMAT_TYPE_NAMES}
 
 
 

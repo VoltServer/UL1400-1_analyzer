@@ -115,11 +115,13 @@ Compare to [stable](https://github.com/VoltServer/UL1400-1_analyzer/compare/stab
 
 #### Issues
 - [#1][]
+- [#4][]
 - [#7][]
 
 #### PRs
 - [#2][] for [#1][]
 - [#8][] for [#7][]
+- [#9][] for [#4][]
 
 ---
 
@@ -128,6 +130,8 @@ Reference-style links here (see below, only in source) in develop-merge order.
 
 [#1]: https://github.com/VoltServer/UL1400-1_analyzer/issues/1 'Issue #1'
 [#7]: https://github.com/VoltServer/UL1400-1_analyzer/issues/7 'Issue #7'
+[#4]: https://github.com/VoltServer/UL1400-1_analyzer/issues/4 'Issue #4'
 
 [#2]: https://github.com/VoltServer/UL1400-1_analyzer/pull/2 'PR #2'
 [#8]: https://github.com/VoltServer/UL1400-1_analyzer/pull/8 'PR #8'
+[#9]: https://github.com/VoltServer/UL1400-1_analyzer/pull/9 'PR #9'
