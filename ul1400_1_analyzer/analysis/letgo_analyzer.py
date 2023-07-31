@@ -340,7 +340,8 @@ def is_current_below_letgo(segment_values:list[float]|None,
 
     Raise:
       ValueError: Raised if an ambiguous condition with respect to UL1400-1 is
-        encountered and could not be resolved.
+        encountered and could not be resolved; or if an unsupported
+        interpretation or standard version was provided.
     """
     if segment_values is None:
         return None
@@ -401,6 +402,7 @@ def is_voltage_below_letgo(segment_values:list[float]|None,
         interpretation:Interpretation=analyzer_support.DEFAULT_INTERPRETATION,
         standard_version:StandardVersion=
             analyzer_support.DEFAULT_STANDARD_VERSION) -> bool|None:
+    # pylint: disable=too-many-branches
     """
     Determines if the provided segment of data is below the let-go threshold for
     voltage.  When the appropriate data is provided, this can be used to assess
@@ -428,7 +430,8 @@ def is_voltage_below_letgo(segment_values:list[float]|None,
     Raise:
       ValueError: Raised if an ambiguous condition with respect to UL1400-1 is
         encountered and could not be resolved; or if an invalid value for the
-        environmental condition is provided.
+        environmental condition is provided; or if an unsupported interpretation
+        or standard version was provided.
     """
     if segment_values is None:
         return None

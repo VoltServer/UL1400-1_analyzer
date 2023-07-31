@@ -51,7 +51,10 @@ def main_letgo(format_type:str, importer_type:str,
         let-go.  This is only required if the fault voltage waveform is
         provided, as this is the only waveform to which it applies.  The valid
         values are "wet" and "dry".
-      start_time [s]:
+      start_time [s]: The time above which to analyze waveform data.  This is
+        useful if the fault is introduced at some mid-point in the time series
+        and may contain invalid data earlier than that.  This can be omitted to
+        use all data in the waveforms.
       voltage_waveform_id: The identifier for the voltage waveform in the data
         being imported.  Usage depends on the importer and format type.  Can be
         omitted if voltage waveform is not being analyzed.
