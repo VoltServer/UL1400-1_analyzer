@@ -366,7 +366,7 @@ def is_current_below_letgo(segment_values:list[float]|None,
         #   that the mean is concerned with the magnitude (i.e. absolute value),
         #   while the peak is the magnitude (i.e. absolute value) of the largest
         #   deviation from the zero point.
-        peak_ma = max([abs(x) for x in segment_values]) * a_to_ma_scalar
+        peak_ma = max(abs(x) for x in segment_values) * a_to_ma_scalar
         mean_ma = abs(mean_ma)
 
     if mean_ma < 0:
@@ -458,7 +458,7 @@ def is_voltage_below_letgo(segment_values:list[float]|None,
         #   that the mean is concerned with the magnitude (i.e. absolute value),
         #   while the peak is the magnitude (i.e. absolute value) of the largest
         #   deviation from the zero point.
-        peak = max([abs(x) for x in segment_values])
+        peak = max(abs(x) for x in segment_values)
         mean = abs(mean)
 
     if mean < 0:

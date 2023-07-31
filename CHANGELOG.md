@@ -70,11 +70,23 @@ Compare to [stable](https://github.com/VoltServer/UL1400-1_analyzer/compare/stab
 - [Added] `.mypy.ini` added to configure `mypy` execution for app code and test
       code ([#1][]).
 - [Added] `max-locals` set to `20` ([#4][]).
+- [Changed] `max-locals` increased from `20` to `25` to balance out the
+      `max-args` being increased from `10` to `15` ([#5][], [#6][]).
+
+
+### Analysis: Analyzer Support
+- [Added] `analyzer_support.py` added for shared data and functionality among
+      analyzers, which for now is `Interpretation` and `StandardVersion` enums
+      with defaults defined ([#5][], [#6][]).
 
 
 ### Analysis: Letgo Analyzer
 - [Added] `letgo_analyzer.py` added with ability to analyze waveforms strictly
       to UL1400-1 with parallel CPU core processing support ([#4][]).
+- [Added] Audit function added to check if the configuration used is critically
+      valid for UL1400-1 assessment ([#5][], [#6][]).
+- [Changed] Current and voltage let-go assessments now performed with the
+      interpretation level and standard version factored in ([#5][], [#6][]).
 
 
 ### Data Import: Data Importer
@@ -91,6 +103,11 @@ Compare to [stable](https://github.com/VoltServer/UL1400-1_analyzer/compare/stab
       in CLI help messages ([#4][]).
 
 
+## Utils: CLI:
+- [Added] `cli.py` added for CLI processing support, with case-insensitive enum
+      option parsing implemented ([#5][], [#6][]).
+
+
 ## Utils: Waveform
 - [Added] `waveform.py` added to encapsulate generic waveform manipulations,
       such as extracting segments and merging regions ([#4][]).
@@ -99,6 +116,8 @@ Compare to [stable](https://github.com/VoltServer/UL1400-1_analyzer/compare/stab
 ### Main
 - [Added] `main.py` added with CLI sub-parser for letgo and help function to
       route CLI args to letgo analyzer as well as display results ([#4][]).
+- [Added] Support for interpretation level and standard version CLI args added
+      along with the usage and audit for those parameters ([#5][], [#6][]).
 
 
 ### Version
@@ -115,7 +134,9 @@ Compare to [stable](https://github.com/VoltServer/UL1400-1_analyzer/compare/stab
 ### Docs: CONTRIBUTING
 - [Added] `CONTRIBUTING.md` added to project root, covering dev setup, general
       workflow, and conventions ([#1][]).
-
+- [Added] Added convention that exceptions will be raised if an unsupported
+      interpretation or standard version encountered in a function that uses
+      that configuration ([#5][], [#6][]).
 
 ### Docs: README
 - [Changed] Updated with project intro (mostly placeholder), links, CI badge
@@ -138,12 +159,15 @@ Compare to [stable](https://github.com/VoltServer/UL1400-1_analyzer/compare/stab
 #### Issues
 - [#1][]
 - [#4][]
+- [#5][]
+- [#6][]
 - [#7][]
 
 #### PRs
 - [#2][] for [#1][]
 - [#8][] for [#7][]
 - [#9][] for [#4][]
+- [#10][] for [#5][], [#6][]
 
 ---
 
@@ -153,7 +177,10 @@ Reference-style links here (see below, only in source) in develop-merge order.
 [#1]: https://github.com/VoltServer/UL1400-1_analyzer/issues/1 'Issue #1'
 [#7]: https://github.com/VoltServer/UL1400-1_analyzer/issues/7 'Issue #7'
 [#4]: https://github.com/VoltServer/UL1400-1_analyzer/issues/4 'Issue #4'
+[#5]: https://github.com/VoltServer/UL1400-1_analyzer/issues/5 'Issue #5'
+[#6]: https://github.com/VoltServer/UL1400-1_analyzer/issues/6 'Issue #6'
 
 [#2]: https://github.com/VoltServer/UL1400-1_analyzer/pull/2 'PR #2'
 [#8]: https://github.com/VoltServer/UL1400-1_analyzer/pull/8 'PR #8'
 [#9]: https://github.com/VoltServer/UL1400-1_analyzer/pull/9 'PR #9'
+[#10]: https://github.com/VoltServer/UL1400-1_analyzer/pull/10 'PR #10'
