@@ -42,6 +42,43 @@ def _init_shared_data(shared_data:Any) -> None:
 
 
 
+def audit_config_valid(interpretation:Interpretation|None,
+        standard_version:StandardVersion, min_window_duration:float|None=None,
+        **_kwargs:Any) -> None:
+    """
+    Audits the configuration parameters to confirm they are valid to critically
+    assess to the standard.
+
+    Will provide a warning message if there is a possibility that results could
+    mislead towards a false positive on compliance.
+
+    Args:
+      interpretation: The level of how strictly to interpret the standard.
+      standard_version: The version of the standard to use for analysis.
+      min_window_duration [s]: The minimum time duration to use as a window
+        size for evaluating data.  For compliance, this should likely be the
+        minimum Fault Recovery Period duration required by UL1400-1.
+      **_kwargs: Absorbs any extra keywords arguments that may be passed in.
+        Not used.
+
+    Raises:
+      ValueError: Raised if an unsupported interpretation or standard version
+        was provided.
+    """
+    if standard_version \
+            is not StandardVersion.UL1400_1_ISSUE_1:
+        raise ValueError('Only Standard Version UL1400-1 Issue #1 is supported'
+                ' at this time')
+    if interpretation not in [Interpretation.STRICT, Interpretation.TYPOS,
+            Interpretation.REASONABLE, Interpretation.SPECULATIVE]:
+        raise ValueError(f'Unsupported interpretation: {interpretation}')
+
+    if min_window_duration < 3:
+        print('**WARNING** Window duration is too small to correctly assess the'
+                ' Fault Recovery Period for UL1400-1 Issue #1')
+
+
+
 def find_time_regions_below_letgo(current_waveform:dict[float, float]|None=None,
         voltage_waveform:dict[float, float]|None=None,
         env_conditions:str|None=None, start_time:float|None=None,

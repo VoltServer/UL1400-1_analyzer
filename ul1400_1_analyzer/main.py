@@ -105,6 +105,8 @@ def main_letgo(format_type:str, importer_type:str,
             print(f' {index + 1}: {region[0]*1000:.3f} ms'
                     f' - {region[1]*1000:.3f} ms')
 
+    letgo_analyzer.audit_config_valid(**analyzer_kwargs)
+
 
 
 
