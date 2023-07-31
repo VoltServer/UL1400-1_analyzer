@@ -14,6 +14,9 @@ from typing import Any
 
 from alive_progress import alive_bar                      # type: ignore[import]
 
+from ul1400_1_analyzer.analysis import analyzer_support
+from ul1400_1_analyzer.analysis.analyzer_support \
+        import Interpretation, StandardVersion
 from ul1400_1_analyzer.utils import waveform as waveform_utils
 
 
@@ -39,10 +42,50 @@ def _init_shared_data(shared_data:Any) -> None:
 
 
 
+def audit_config_valid(interpretation:Interpretation|None,
+        standard_version:StandardVersion, min_window_duration:float|None=None,
+        **_kwargs:Any) -> None:
+    """
+    Audits the configuration parameters to confirm they are valid to critically
+    assess to the standard.
+
+    Will provide a warning message if there is a possibility that results could
+    mislead towards a false positive on compliance.
+
+    Args:
+      interpretation: The level of how strictly to interpret the standard.
+      standard_version: The version of the standard to use for analysis.
+      min_window_duration [s]: The minimum time duration to use as a window
+        size for evaluating data.  For compliance, this should likely be the
+        minimum Fault Recovery Period duration required by UL1400-1.
+      **_kwargs: Absorbs any extra keywords arguments that may be passed in.
+        Not used.
+
+    Raises:
+      ValueError: Raised if an unsupported interpretation or standard version
+        was provided.
+    """
+    if standard_version \
+            is not StandardVersion.UL1400_1_ISSUE_1:
+        raise ValueError('Only Standard Version UL1400-1 Issue #1 is supported'
+                ' at this time')
+    if interpretation not in [Interpretation.STRICT, Interpretation.TYPOS,
+            Interpretation.REASONABLE, Interpretation.SPECULATIVE]:
+        raise ValueError(f'Unsupported interpretation: {interpretation}')
+
+    if min_window_duration < 3:
+        print('**WARNING** Window duration is too small to correctly assess the'
+                ' Fault Recovery Period for UL1400-1 Issue #1')
+
+
+
 def find_time_regions_below_letgo(current_waveform:dict[float, float]|None=None,
         voltage_waveform:dict[float, float]|None=None,
         env_conditions:str|None=None, start_time:float|None=None,
-        min_window_duration:float=3, num_cores:int|None=None) \
+        min_window_duration:float=3, num_cores:int|None=None,
+        interpretation:Interpretation=analyzer_support.DEFAULT_INTERPRETATION,
+        standard_version:StandardVersion=
+            analyzer_support.DEFAULT_STANDARD_VERSION) \
         -> tuple[tuple[float, float], ...]:
     """
     Finds the time regions that are below the let-go threshold.  When the
@@ -77,6 +120,10 @@ def find_time_regions_below_letgo(current_waveform:dict[float, float]|None=None,
         size for evaluating data.  For compliance, this should likely be the
         minimum Fault Recovery Period duration required by UL1400-1.
       num_cores: The number of cores to use.  Can be omitted to use all cores.
+      interpretation: The level of how strictly to interpret the standard.  Can
+        be omitted to use default.
+      standard_version: The version of the standard to use for analysis.  Can be
+        omitted to use default.
 
     Returns:
       time_regions_below_letgo [s]: These are the time regions identified as
@@ -130,7 +177,8 @@ def find_time_regions_below_letgo(current_waveform:dict[float, float]|None=None,
                     as progress_bar:
 
                 args = [(measurement_type, waveform, *t, min_window_duration,
-                            env_conditions) for t in target_times]
+                            env_conditions, interpretation, standard_version)
+                            for t in target_times]
                 future_result = pool.starmap_async(_analyze_segment, args,
                         error_callback=_error_handler)
 
@@ -159,7 +207,10 @@ def find_time_regions_below_letgo(current_waveform:dict[float, float]|None=None,
 
 def _analyze_segment(measurement_type:str, waveform:dict[float, float]|None,
         target_start_time:float, target_end_time:float,
-        min_window_duration:float, env_conditions:str|None) \
+        min_window_duration:float, env_conditions:str|None,
+        interpretation:Interpretation=analyzer_support.DEFAULT_INTERPRETATION,
+        standard_version:StandardVersion=
+            analyzer_support.DEFAULT_STANDARD_VERSION) \
         -> tuple[float, float]|None:
     """
     Finds the segment of data to analyze and performs the let-go analysis.
@@ -191,6 +242,10 @@ def _analyze_segment(measurement_type:str, waveform:dict[float, float]|None,
         let-go.  This is only required if the fault voltage waveform is
         provided, as this is the only waveform to which it applies.  The valid
         values are "wet" and "dry".
+      interpretation: The level of how strictly to interpret the standard.  Can
+        be omitted to use default.
+      standard_version: The version of the standard to use for analysis.  Can be
+        omitted to use default.
 
     Returns:
       new_passing_region: The new region, defined as a start and end time, that
@@ -202,7 +257,7 @@ def _analyze_segment(measurement_type:str, waveform:dict[float, float]|None,
             'start')
 
     if is_below_letgo(measurement_type, segment.values(),
-            env_conditions):
+            env_conditions, interpretation, standard_version):
         new_passing_region = (min(segment.keys()), max(segment.keys()))
 
     if _PROGRESS_COUNTER is not None:
@@ -214,7 +269,10 @@ def _analyze_segment(measurement_type:str, waveform:dict[float, float]|None,
 
 
 def is_below_letgo(measurement_type:str, segment_values:list[float]|None,
-        env_conditions:str|None=None) -> bool|None:
+        env_conditions:str|None=None,
+        interpretation:Interpretation=analyzer_support.DEFAULT_INTERPRETATION,
+        standard_version:StandardVersion=
+            analyzer_support.DEFAULT_STANDARD_VERSION) -> bool|None:
     """
     Determines if the provided segment of data is below the let-go threshold.
     When the appropriate data is provided, this can be used to assess if the
@@ -230,6 +288,10 @@ def is_below_letgo(measurement_type:str, segment_values:list[float]|None,
         let-go.  This is only required if the measurement type provided is
         "voltage", as this is the only type to which it applies.  The valid
         values are "wet" and "dry".
+      interpretation: The level of how strictly to interpret the standard.  Can
+        be omitted to use default.
+      standard_version: The version of the standard to use for analysis.  Can be
+        omitted to use default.
 
     Returns:
       _: True if the segment is below the appropriate let-go threshold based on
@@ -242,15 +304,20 @@ def is_below_letgo(measurement_type:str, segment_values:list[float]|None,
         provided.
     """
     if measurement_type == 'current':
-        return is_current_below_letgo(segment_values)
+        return is_current_below_letgo(segment_values, interpretation,
+                standard_version)
     if measurement_type == 'voltage':
-        return is_voltage_below_letgo(segment_values, env_conditions)
+        return is_voltage_below_letgo(segment_values, env_conditions,
+                interpretation, standard_version)
     raise ValueError('Measurement type must be "voltage" or "current", got'
             f' "{measurement_type}"')
 
 
 
-def is_current_below_letgo(segment_values:list[float]|None) -> bool|None:
+def is_current_below_letgo(segment_values:list[float]|None,
+        interpretation:Interpretation=analyzer_support.DEFAULT_INTERPRETATION,
+        standard_version:StandardVersion=
+            analyzer_support.DEFAULT_STANDARD_VERSION) -> bool|None:
     """
     Determines if the provided segment of data is below the let-go threshold for
     current.  When the appropriate data is provided, this can be used to assess
@@ -260,6 +327,10 @@ def is_current_below_letgo(segment_values:list[float]|None) -> bool|None:
       segment_values: The electrical current values of the segment of the
         waveform to evaluate (i.e. times associated with each value are not
         needed and should not be included).
+      interpretation: The level of how strictly to interpret the standard.  Can
+        be omitted to use default.
+      standard_version: The version of the standard to use for analysis.  Can be
+        omitted to use default.
 
     Returns:
       _: True if the segment is below the appropriate let-go threshold based on
@@ -269,38 +340,69 @@ def is_current_below_letgo(segment_values:list[float]|None) -> bool|None:
 
     Raise:
       ValueError: Raised if an ambiguous condition with respect to UL1400-1 is
-        encountered and could not be resolved.
+        encountered and could not be resolved; or if an unsupported
+        interpretation or standard version was provided.
     """
     if segment_values is None:
         return None
+
+    if standard_version \
+            is not StandardVersion.UL1400_1_ISSUE_1:
+        raise ValueError('Only Standard Version UL1400-1 Issue #1 is supported'
+                ' at this time')
+    if interpretation not in [Interpretation.STRICT, Interpretation.TYPOS,
+            Interpretation.REASONABLE, Interpretation.SPECULATIVE]:
+        raise ValueError(f'Unsupported interpretation: {interpretation}')
 
     a_to_ma_scalar = 1000
 
     peak_ma = max(segment_values) * a_to_ma_scalar
     mean_ma = sum(segment_values) / len(segment_values) * a_to_ma_scalar
 
+    if interpretation in [Interpretation.REASONABLE,
+            Interpretation.SPECULATIVE]:
+        # Based on source of these limits from "Effect of Wave Form on Let-Go
+        #   Currents" by Charles F. Dalziel [December 1943], it could be argued
+        #   that the mean is concerned with the magnitude (i.e. absolute value),
+        #   while the peak is the magnitude (i.e. absolute value) of the largest
+        #   deviation from the zero point.
+        peak_ma = max(abs(x) for x in segment_values) * a_to_ma_scalar
+        mean_ma = abs(mean_ma)
+
     if mean_ma < 0:
         # This should likely invert or consider worst peak, but technically is
-        #   undefined
+        #   undefined.  See reasonable interpretation for possible handling
         raise ValueError('DC values less than 0 are not supported for let-go:'
                 f' {mean_ma} mA')
+
     if mean_ma <= 4.21:
         limit_ma = 5 * math.sqrt(2)
+
     elif mean_ma <= 30:
-        # NOTE: Technically this is 33.3, not 3.33; but it is easy to determine
-        #   that 33.3 is a typo
-        limit_ma = 3.33 + 0.89 * mean_ma
+        if interpretation is Interpretation.STRICT:
+            limit_ma = 33.3 + 0.89 * mean_ma
+        else:
+            # Via figure 5.4 in UL1400-1 Issue #1, it is easy to confirm that
+            #   33.3 is a typo of 3.33
+            limit_ma = 3.33 + 0.89 * mean_ma
+
     else:
         # This should likely be a failure, but technically is undefined
-        raise ValueError('DC values greater than 30 mA are not supported for'
-                f' let-go: {mean_ma} mA')
+        if interpretation in [Interpretation.STRICT, Interpretation.TYPOS]:
+            raise ValueError('DC values greater than 30 mA are not supported'
+                    f' for let-go: {mean_ma} mA')
+        return False
 
     return peak_ma <= limit_ma
 
 
 
 def is_voltage_below_letgo(segment_values:list[float]|None,
-        env_conditions:str) -> bool|None:
+        env_conditions:str,
+        interpretation:Interpretation=analyzer_support.DEFAULT_INTERPRETATION,
+        standard_version:StandardVersion=
+            analyzer_support.DEFAULT_STANDARD_VERSION) -> bool|None:
+    # pylint: disable=too-many-branches
     """
     Determines if the provided segment of data is below the let-go threshold for
     voltage.  When the appropriate data is provided, this can be used to assess
@@ -314,6 +416,10 @@ def is_voltage_below_letgo(segment_values:list[float]|None,
         let-go.  This is only required if the measurement type provided is
         "voltage", as this is the only type to which it applies.  The valid
         values are "wet" and "dry".
+      interpretation: The level of how strictly to interpret the standard.  Can
+        be omitted to use default.
+      standard_version: The version of the standard to use for analysis.  Can be
+        omitted to use default.
 
     Returns:
       _: True if the segment is below the appropriate let-go threshold based on
@@ -324,10 +430,19 @@ def is_voltage_below_letgo(segment_values:list[float]|None,
     Raise:
       ValueError: Raised if an ambiguous condition with respect to UL1400-1 is
         encountered and could not be resolved; or if an invalid value for the
-        environmental condition is provided.
+        environmental condition is provided; or if an unsupported interpretation
+        or standard version was provided.
     """
     if segment_values is None:
         return None
+
+    if standard_version \
+            is not StandardVersion.UL1400_1_ISSUE_1:
+        raise ValueError('Only Standard Version UL1400-1 Issue #1 is supported'
+                ' at this time')
+    if interpretation not in [Interpretation.STRICT, Interpretation.TYPOS,
+            Interpretation.REASONABLE, Interpretation.SPECULATIVE]:
+        raise ValueError(f'Unsupported interpretation: {interpretation}')
 
     if env_conditions not in ['wet', 'dry']:
         raise ValueError('Environmental conditions must be specified as wet or'
@@ -335,6 +450,16 @@ def is_voltage_below_letgo(segment_values:list[float]|None,
 
     peak = max(segment_values)
     mean = sum(segment_values) / len(segment_values)
+
+    if interpretation in [Interpretation.REASONABLE,
+            Interpretation.SPECULATIVE]:
+        # Based on source of these limits from "Effect of Wave Form on Let-Go
+        #   Currents" by Charles F. Dalziel [December 1943], it could be argued
+        #   that the mean is concerned with the magnitude (i.e. absolute value),
+        #   while the peak is the magnitude (i.e. absolute value) of the largest
+        #   deviation from the zero point.
+        peak = max(abs(x) for x in segment_values)
+        mean = abs(mean)
 
     if mean < 0:
         # This should likely invert or consider worst peak, but technically is
@@ -349,8 +474,11 @@ def is_voltage_below_letgo(segment_values:list[float]|None,
             limit = 16.5 + 0.45 * mean
         else:
             # This should likely be a failure, but technically is undefined
-            raise ValueError('DC values greater than 30 V are not supported for'
-                    f' let-go under wet conditions: {mean} V')
+            if interpretation in [Interpretation.STRICT, Interpretation.TYPOS]:
+                raise ValueError('DC values greater than 30 V are not supported'
+                        f' for let-go under wet conditions: {mean} V')
+            return False
+
     elif env_conditions == 'dry':
         if mean <= 20.9:
             limit = 42.4
@@ -358,7 +486,9 @@ def is_voltage_below_letgo(segment_values:list[float]|None,
             limit = 33 + 0.45 * mean
         else:
             # This should likely be a failure, but technically is undefined
-            raise ValueError('DC values greater than 60 V are not supported for'
-                    f' let-go under dry conditions: {mean} V')
+            if interpretation in [Interpretation.STRICT, Interpretation.TYPOS]:
+                raise ValueError('DC values greater than 60 V are not supported'
+                        f' for let-go under dry conditions: {mean} V')
+            return False
 
     return peak <= limit

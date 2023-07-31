@@ -5,8 +5,8 @@ init-hook='''
         import os, sys;
         sys.path.append(os.path.dirname(find_pylintrc()));
         '''
-max-args=10
-max-locals=20
+max-args=15
+max-locals=25
 fail-on=
         useless-suppression,
 

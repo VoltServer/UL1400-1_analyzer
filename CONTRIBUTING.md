@@ -42,6 +42,14 @@ development, it is most likely that `dev-required` is the correct arg.
 
 # Conventions
 
+## Interpretation and Standard Version Support
+In some parts of this project, different decisions are made depending on which
+version of the standard is being used as well as the interpretation level that
+is allowed.  Any function that acts on either of these parameters MUST include
+a check that raises an exception if any option other than those supported at the
+time of development is provided.
+
+
 ## Logger
 Balancing readability against performance, the pylint warnings
 `logging-fstring-interpolation` and `logging-not-lazy` are disabled.  The
