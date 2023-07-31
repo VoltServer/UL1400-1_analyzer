@@ -1,0 +1,3 @@
+alive-progress
+mypy==0.971
+pylint==2.14.5

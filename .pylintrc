@@ -1,0 +1,24 @@
+[MASTER]
+good-names=_,a,b,c,d,ex,f,i,j,k,o,r,s,t,v,x,y
+init-hook='''
+        from pylint.config import find_pylintrc;
+        import os, sys;
+        sys.path.append(os.path.dirname(find_pylintrc()));
+        '''
+max-args=15
+max-locals=25
+fail-on=
+        useless-suppression,
+
+
+[MESSAGE CONTROL]
+disable=
+        logging-fstring-interpolation,
+        logging-not-lazy,
+enable=
+        useless-suppression,
+
+
+[SIMILARITIES]
+min-similarity-lines=8
+ignore-imports=yes
