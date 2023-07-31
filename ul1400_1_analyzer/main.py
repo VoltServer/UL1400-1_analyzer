@@ -8,8 +8,12 @@ from __future__ import annotations
 import argparse
 from typing import TYPE_CHECKING, Any
 
+from ul1400_1_analyzer.analysis import analyzer_support
 from ul1400_1_analyzer.analysis import letgo_analyzer
+from ul1400_1_analyzer.analysis.analyzer_support \
+        import Interpretation, StandardVersion
 from ul1400_1_analyzer.data_import import data_importer
+from ul1400_1_analyzer.utils import cli
 
 if TYPE_CHECKING:
     import os
@@ -21,7 +25,11 @@ def main_letgo(format_type:str, importer_type:str,
         data_source_file:str|os.PathLike|None=None,
         env_conditions:str|None=None, start_time:float|None=None,
         voltage_waveform_id:str|None=None, window_duration:float|None=None,
-        num_cores:int|None=None, **_kwargs:Any) -> None:
+        interpretation:analyzer_support.Interpretation=
+            analyzer_support.DEFAULT_INTERPRETATION,
+        num_cores:int|None=None,
+        standard_version:analyzer_support.StandardVersion=
+            analyzer_support.DEFAULT_STANDARD_VERSION, **_kwargs:Any) -> None:
     """
     The main entry point for let-go evaluation, this processes the CLI input
     arguments to pass along for analysis.
@@ -50,8 +58,12 @@ def main_letgo(format_type:str, importer_type:str,
       window_duration [s]: The minimum time duration to use as a window
         size for evaluating data.  For compliance, this should likely be the
         minimum Fault Recovery Period duration required by UL1400-1.
+      interpretation: The level of how strictly to interpret the standard.  Can
+        be omitted to use default.
       num_cores: The number of CPU cores to use for parallel processing.  Can be
         omitted to use all cores.
+      standard_version: The version of the standard to use for analysis.  Can be
+        omitted to use default.
       **_kwargs: Absorbs any extra keywords arguments that may be passed in.
         Not used.
     """
@@ -79,8 +91,11 @@ def main_letgo(format_type:str, importer_type:str,
         analyzer_kwargs['min_window_duration'] = window_duration
     if num_cores:
         analyzer_kwargs['num_cores'] = num_cores
+    analyzer_kwargs['interpretation'] = interpretation
+    analyzer_kwargs['standard_version'] = standard_version
 
-    passing_regions = letgo_analyzer.find_time_regions_below_letgo(**analyzer_kwargs)
+    passing_regions = letgo_analyzer.find_time_regions_below_letgo(
+            **analyzer_kwargs)
     if not passing_regions:
         print('No regions comply with let-go limits')
     else:
@@ -148,12 +163,28 @@ if __name__ == '__main__':
                 ' the default.  If provided, this must be a time in seconds.'
                 '  This will ensure at least this much time is in the window'
                 ' for each analysis window.')
+    letgo_parser.add_argument('--interpretation-level',
+            dest='interpretation',
+            action=cli.EnumByNameAction,
+            type=Interpretation,
+            default=analyzer_support.DEFAULT_INTERPRETATION,
+            help='The level of interpretation to use when performing the'
+                ' evaluation.  This can range from a strict interpretation of'
+                ' the standard to more speculative interpretations to resolve'
+                ' ambiguous, conflicting, or absent material.  Defaults to'
+                ' strict.')
     letgo_parser.add_argument('--num-cores',
             help='The number of CPU cores to use during the analysis.  Can be'
                 ' omitted, at which point it will default to all cores.  Note'
                 ' that using all cores may make the computer slow/unresponsive'
                 ' until analysis is complete; but the progress indicator should'
                 ' continue showing that it is actively running.')
+    letgo_parser.add_argument('--standard_version',
+            action=cli.EnumByNameAction,
+            type=StandardVersion,
+            default=analyzer_support.DEFAULT_STANDARD_VERSION,
+            help='The version of the standard to use when performing the'
+                ' evaluation.  Defaults to the latest.')
     letgo_parser.set_defaults(func=main_letgo)
 
     cli_args = main_parser.parse_args()
