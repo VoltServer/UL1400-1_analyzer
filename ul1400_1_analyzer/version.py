@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 
 
-_VERSION = '0.0.0+dev'
+_VERSION = '1.0.0+dev'
 
 
 
