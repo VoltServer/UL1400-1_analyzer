@@ -183,6 +183,8 @@ No comparison (initial release).
 - [#8][] for [#7][]
 - [#9][] for [#4][]
 - [#10][] for [#5][], [#6][]
+- [#12][]
+- [#13][]
 
 ---
 
@@ -199,3 +201,5 @@ Reference-style links here (see below, only in source) in develop-merge order.
 [#8]: https://github.com/VoltServer/UL1400-1_analyzer/pull/8 'PR #8'
 [#9]: https://github.com/VoltServer/UL1400-1_analyzer/pull/9 'PR #9'
 [#10]: https://github.com/VoltServer/UL1400-1_analyzer/pull/10 'PR #10'
+[#12]: https://github.com/VoltServer/UL1400-1_analyzer/pull/12 'PR #12'
+[#13]: https://github.com/VoltServer/UL1400-1_analyzer/pull/13 'PR #13'
