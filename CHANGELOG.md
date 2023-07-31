@@ -31,6 +31,21 @@ Release change log convention via
 Compare to [stable](https://github.com/VoltServer/UL1400-1_analyzer/compare/stable...develop)
 
 
+### Ref Links
+
+#### Milestones & Projects
+
+#### Issues
+
+#### PRs
+
+
+
+# [v1.0.0](https://github.com/VoltServer/UL1400-1_analyzer/releases/tag/v1.0.0) - 2023-07-31
+
+No comparison (initial release).
+
+
 ### Project & Toolchain: `.git*`, `.editorconfig`
 - [Added] `.editorconfig` and `.gitattributes` added ([#1][]).
 - [Added] VS Code related items added to `.gitignore` ([#1][]).
